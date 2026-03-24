@@ -1,5 +1,7 @@
+
 import { connectDB } from "@/lib/db";
 import Note from "@/models/Note";
+
 import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
