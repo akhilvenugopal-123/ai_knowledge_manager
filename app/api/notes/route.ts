@@ -1,19 +1,21 @@
+import { connectDB } from "@/lib/db";
+import Note from "@/models/Note";
 import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
-  try {
-    const body = await req.json();
+  await connectDB();
 
-    const { text } = body;
+  const body = await req.json();
 
-    // temporary mock response (to fix build)
-    return NextResponse.json({
-      summary: `Summary of: ${text}`,
-    });
-  } catch (error) {
-    return NextResponse.json(
-      { error: "Something went wrong" },
-      { status: 500 }
-    );
-  }
+  const note = await Note.create(body);
+
+  return NextResponse.json(note);
+}
+
+export async function GET() {
+  await connectDB();
+
+  const notes = await Note.find();
+
+  return NextResponse.json(notes);
 }
