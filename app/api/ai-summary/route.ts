@@ -1,24 +1,39 @@
-import OpenAI from "openai";
 import { NextResponse } from "next/server";
-
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY
-});
+import OpenAI from "openai";
 
 export async function POST(req: Request) {
-  const { text } = await req.json();
+  try {
+    const { text } = await req.json();
 
-  const completion = await openai.chat.completions.create({
-    model: "gpt-4o-mini",
-    messages: [
-      {
-        role: "user",
-        content: `Summarize this text:\n${text}`
-      }
-    ]
-  });
+    if (!text) {
+      return NextResponse.json(
+        { error: "Text is required" },
+        { status: 400 }
+      );
+    }
 
-  return NextResponse.json({
-    summary: completion.choices[0].message.content
-  });
+    const openai = new OpenAI({
+      apiKey: process.env.OPENAI_API_KEY,
+    });
+
+    const completion = await openai.chat.completions.create({
+      model: "gpt-4o-mini",
+      messages: [
+        {
+          role: "user",
+          content: `Summarize this:\n${text}`,
+        },
+      ],
+    });
+
+    return NextResponse.json({
+      summary: completion.choices[0].message.content,
+    });
+
+  } catch (error) {
+    return NextResponse.json(
+      { error: "AI summary failed" },
+      { status: 500 }
+    );
+  }
 }

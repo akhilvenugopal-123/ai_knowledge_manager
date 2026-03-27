@@ -2,17 +2,13 @@ import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
   try {
-    const body = await req.json();
-
-    const { text } = body;
-
-    // temporary mock response (to fix build)
+    // later: handle file upload
     return NextResponse.json({
-      summary: `Summary of: ${text}`,
+      message: "Upload endpoint (to be implemented)",
     });
   } catch (error) {
     return NextResponse.json(
-      { error: "Something went wrong" },
+      { error: "Upload failed" },
       { status: 500 }
     );
   }
