@@ -28,8 +28,9 @@ export async function GET() {
 
     const notes = await Note.find().sort({ createdAt: -1 });
 
-    return NextResponse.json(notes);
+    return NextResponse.json(notes || []); // ✅ safe fallback
   } catch (error) {
+    console.error("GET /api/notes error:", error); // 👈 ADD THIS
     return NextResponse.json(
       { error: "Failed to fetch notes" },
       { status: 500 }
