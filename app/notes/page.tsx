@@ -155,29 +155,60 @@ export default function NotesPage() {
     </div>
 
     {/* Notes List */}
-    <div className="mt-6 grid gap-4">
-      {Array.isArray(notes) && notes.length > 0 ? (
-        notes.map((note) => (
-          <div
-            key={note._id}
-            className="bg-white p-4 rounded-xl shadow-sm border hover:shadow-md transition"
-          >
-            <p className="text-gray-800 text-sm mb-2">
-              {note.content}
-            </p>
+    {/* Saved Notes Header */}
+    <div className="mt-8">
+      <div className="flex items-center justify-between mb-3">
+        <h2 className="text-lg font-semibold text-gray-800">
+          Saved Notes
+        </h2>
 
-            {note.summary && (
-              <div className="text-xs text-gray-500 border-t pt-2">
-                <strong>Summary:</strong> {note.summary}
+        <span className="text-xs bg-gray-200 px-2 py-1 rounded-full text-gray-600">
+          {notes.length} notes
+        </span>
+      </div>
+
+      {/* Notes List */}
+      <div className="space-y-4">
+        {Array.isArray(notes) && notes.length > 0 ? (
+          notes.map((note) => (
+            <div
+              key={note._id}
+              className="bg-white  rounded-xl p-4 shadow-sm hover:shadow-xl transition"
+            >
+              {/* Top Row */}
+              <div className="flex justify-between items-center mb-2 text-xs text-gray-400">
+                <span>🕒 Just now</span>
+
+                <div className="flex gap-3 text-gray-400">
+                  <button className="hover:text-gray-600">📋</button>
+                  <button className="hover:text-red-500">🗑️</button>
+                </div>
               </div>
-            )}
-          </div>
-        ))
-      ) : (
-        <p className="text-center text-gray-500 text-sm">
-          No notes yet
-        </p>
-      )}
+
+              {/* Content */}
+              <p className="text-sm text-gray-700 leading-relaxed line-clamp-3">
+                {note.content}
+              </p>
+
+              {/* Summary */}
+              {note.summary && (
+                <div className="mt-3 bg-linear-to-r from-purple-100 to-indigo-100 p-3 rounded-lg">
+                  <p className="text-xs font-medium text-purple-700 mb-1">
+                    ✨ Summary
+                  </p>
+                  <p className="text-sm text-gray-700 leading-relaxed">
+                    {note.summary}
+                  </p>
+                </div>
+              )}
+            </div>
+          ))
+        ) : (
+          <p className="text-center text-gray-500 text-sm mt-6">
+            No notes yet
+          </p>
+        )}
+      </div>
     </div>
 
   </div>

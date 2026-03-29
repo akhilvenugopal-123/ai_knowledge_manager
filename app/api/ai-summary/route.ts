@@ -1,6 +1,9 @@
 import { NextResponse } from "next/server";
 import OpenAI from "openai";
 
+// 🔁 Toggle this
+const USE_REAL_AI = false;
+
 export async function POST(req: Request) {
   try {
     const { text } = await req.json();
@@ -12,6 +15,19 @@ export async function POST(req: Request) {
       );
     }
 
+    // 🧠 MOCK AI (FREE + FAST)
+    if (!USE_REAL_AI) {
+      const sentences = text.split(".");
+      const summary =
+        sentences
+          .slice(0, 2)
+          .join(".")
+          .trim() + (sentences.length > 2 ? "." : "");
+
+      return NextResponse.json({ summary });
+    }
+
+    // 🤖 REAL AI (OpenAI)
     const openai = new OpenAI({
       apiKey: process.env.OPENAI_API_KEY,
     });
@@ -31,6 +47,8 @@ export async function POST(req: Request) {
     });
 
   } catch (error) {
+    console.error("❌ AI ERROR:", error);
+
     return NextResponse.json(
       { error: "AI summary failed" },
       { status: 500 }
