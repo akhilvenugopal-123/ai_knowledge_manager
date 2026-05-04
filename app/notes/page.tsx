@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useSession, signIn } from "next-auth/react";
+import { useEffect, useState, useCallback } from "react";
+import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 
 type Note = {
@@ -11,98 +11,82 @@ type Note = {
 };
 
 export default function NotesPage() {
-  const { data: session, status } = useSession();
   const router = useRouter();
+
+  const { data: session, status } = useSession({
+    required: true,
+    onUnauthenticated() {
+      router.replace("/login");
+    },
+  });
 
   const [notes, setNotes] = useState<Note[]>([]);
   const [text, setText] = useState("");
   const [summary, setSummary] = useState("");
   const [loading, setLoading] = useState(false);
+  const [notesLoading, setNotesLoading] = useState(true);
 
-  // 🔐 Redirect if not logged in
+  // ✅ Fetch notes only when authenticated
+  const fetchNotes = useCallback(async () => {
+    try {
+      setNotesLoading(true);
+
+      const res = await fetch("/api/notes");
+
+      if (res.status === 401) {
+        router.replace("/login");
+        return;
+      }
+
+      const data = await res.json();
+
+      if (Array.isArray(data)) {
+        setNotes(data);
+      } else {
+        setNotes([]);
+      }
+    } catch (error) {
+      console.error("Fetch notes failed:", error);
+      setNotes([]);
+    } finally {
+      setNotesLoading(false);
+    }
+  }, [router]);
+
+  // ✅ Redirect only AFTER session check completes
   useEffect(() => {
-    if (status === "loading") return;
-
-    if (!session) {
-      router.push("/login");
+    if (status === "authenticated") {
+      fetchNotes();
     }
-  }, [session, status, router]);
-
-  // ✅ Fetch notes ONLY when logged in
-  const fetchNotes = async () => {
-    try {
-      const res = await fetch("/api/notes");
-
-      if (res.status === 401) {
-        router.push("/login");
-        return;
-      }
-
-      const data = await res.json();
-
-      if (Array.isArray(data)) {
-        setNotes(data);
-      } else {
-        console.error("Invalid response:", data);
-        setNotes([]);
-      }
-    } catch (err) {
-      console.error("Fetch failed:", err);
-      setNotes([]);
-    }
-  };
-
- useEffect(() => {
-  if (!session) return;
-
-  const loadNotes = async () => {
-    try {
-      const res = await fetch("/api/notes");
-
-      if (res.status === 401) {
-        router.push("/login");
-        return;
-      }
-
-      const data = await res.json();
-
-      if (Array.isArray(data)) {
-        setNotes(data);
-      } else {
-        console.error("Invalid response:", data);
-        setNotes([]);
-      }
-    } catch (err) {
-      console.error("Fetch failed:", err);
-      setNotes([]);
-    }
-  };
-
-  loadNotes();
-}, [session, router]);
+  }, [status, fetchNotes]);
 
   // ✨ Generate Summary
   const generateSummary = async () => {
-    if (!text) return alert("Enter note first");
+    if (!text.trim()) return alert("Enter note first");
 
-    setLoading(true);
+    try {
+      setLoading(true);
 
-    const res = await fetch("/api/ai-summary", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ text }),
-    });
+      const res = await fetch("/api/ai-summary", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ text }),
+      });
 
-    const data = await res.json();
-    setSummary(data.summary);
-    setLoading(false);
+      const data = await res.json();
+      setSummary(data.summary || "");
+    } catch (error) {
+      console.error("Summary failed:", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   // 💾 Save Note
   const saveNote = async () => {
-    if (!text) return alert("Enter note");
+    if (!text.trim()) return alert("Enter note");
 
     try {
       const res = await fetch("/api/notes", {
@@ -117,23 +101,23 @@ export default function NotesPage() {
       });
 
       if (res.status === 401) {
-        router.push("/login");
+        router.replace("/login");
         return;
       }
 
       setText("");
       setSummary("");
 
-      await fetchNotes();
-    } catch (err) {
-      console.error("Save failed:", err);
+      fetchNotes();
+    } catch (error) {
+      console.error("Save failed:", error);
     }
   };
 
-  // ⛔ Prevent render while checking auth
+  // ⏳ While checking auth
   if (status === "loading") {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center text-gray-600">
         Checking authentication...
       </div>
     );
@@ -142,40 +126,44 @@ export default function NotesPage() {
   if (!session) return null;
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-gray-100 to-gray-200 flex items-center justify-center p-6">
+    <div className="min-h-screen bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center p-6">
       <div className="w-full max-w-3xl">
-
         {/* Header */}
         <div className="text-center mb-6">
-          <h1 className="text-3xl font-semibold text-gray-800">
-            📝 Notes
-          </h1>
+          <h1 className="text-3xl font-semibold text-gray-800">📝 Notes</h1>
+
           <p className="text-gray-500 text-sm mt-1">
-            Welcome, {session.user?.name}
+            Welcome, {session?.user?.name}
           </p>
         </div>
 
-        {/* Input */}
+        {/* Input Card */}
         <div className="bg-white rounded-2xl shadow-lg p-6">
           <textarea
-            className="w-full h-40 bg-gray-100 rounded-lg p-4 mb-4"
+            className="w-full h-40 bg-gray-100 rounded-lg p-4 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-purple-400"
             placeholder="Write your note..."
             value={text}
             onChange={(e) => setText(e.target.value)}
           />
 
-          <div className="flex gap-3 mb-4">
-            <button onClick={generateSummary}>
+          <div className="flex gap-3 mt-4">
+            <button
+              onClick={generateSummary}
+              className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700"
+            >
               {loading ? "Summarizing..." : "✨ Summarize"}
             </button>
 
-            <button onClick={saveNote}>
+            <button
+              onClick={saveNote}
+              className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+            >
               💾 Save
             </button>
           </div>
 
           {summary && (
-            <div className="bg-gray-100 p-3 rounded">
+            <div className="mt-4 bg-gray-100 p-3 rounded-lg text-sm">
               <strong>Summary:</strong> {summary}
             </div>
           )}
@@ -183,24 +171,27 @@ export default function NotesPage() {
 
         {/* Notes */}
         <div className="mt-6 space-y-4">
-          {notes.length > 0 ? (
+          {notesLoading ? (
+            <p className="text-center text-gray-500">Loading notes...</p>
+          ) : notes.length > 0 ? (
             notes.map((note) => (
-              <div key={note._id} className="bg-white p-4 rounded-xl shadow">
-                <p>{note.content}</p>
+              <div
+                key={note._id}
+                className="bg-white p-4 rounded-xl shadow-sm"
+              >
+                <p className="text-gray-800">{note.content}</p>
+
                 {note.summary && (
-                  <div className="text-sm text-gray-500 mt-2">
+                  <div className="mt-2 text-sm text-gray-500">
                     ✨ {note.summary}
                   </div>
                 )}
               </div>
             ))
           ) : (
-            <p className="text-center text-gray-500">
-              No notes yet
-            </p>
+            <p className="text-center text-gray-500">No notes yet</p>
           )}
         </div>
-
       </div>
     </div>
   );
