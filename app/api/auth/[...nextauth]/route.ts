@@ -100,14 +100,21 @@ export const authOptions: NextAuthOptions = {
 
     // 🔐 Attach user id to JWT
     async jwt({ token, user }) {
-      if (user) {
-        token.id = user.id;
+      await connectDB();
+
+      // First login (Credentials or Google)
+      if (user?.email) {
+        const dbUser = await User.findOne({
+          email: user.email,
+        });
+
+        if (dbUser) {
+          token.id = dbUser._id.toString();
+        }
       }
 
-      // Ensure ID exists for Google users
+      // Existing session refresh
       if (!token.id && token.email) {
-        await connectDB();
-
         const dbUser = await User.findOne({
           email: token.email,
         });
@@ -125,7 +132,7 @@ export const authOptions: NextAuthOptions = {
       if (session.user) {
         session.user.id = token.id as string;
       }
-
+       console.log("SESSION USER:", session.user);
       return session;
     },
   },

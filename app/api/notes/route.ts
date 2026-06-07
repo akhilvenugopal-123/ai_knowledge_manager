@@ -34,7 +34,9 @@ export async function POST(req: Request) {
     console.error("POST /api/notes error:", error);
 
     return NextResponse.json(
-      { error: "Failed to create note" },
+      { error: "Failed to create note",
+         details: String(error),
+      },
       { status: 500 }
     );
   }
