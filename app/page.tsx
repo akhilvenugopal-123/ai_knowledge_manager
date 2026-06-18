@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
+import Navbar from "./Navbar";
 
 export default function LandingPage() {
   const router = useRouter();
@@ -18,60 +19,7 @@ export default function LandingPage() {
     <div className="min-h-screen bg-gradient-to-br from-gray-100 to-gray-200 flex flex-col">
 
       {/* Navbar */}
-      <div className="flex justify-between items-center px-6 py-4 bg-white shadow-sm">
-        <h1 className="text-xl font-semibold">
-          AI Notes
-        </h1>
-
-        <div className="flex items-center gap-3">
-
-          {/* Show user name when logged in */}
-          {session?.user && (
-            <span className="text-gray-600 text-sm">
-              Hi, {session.user.name}
-            </span>
-          )}
-
-          {status === "loading" ? (
-            <div className="text-gray-500 text-sm">
-              Loading...
-            </div>
-          ) : session ? (
-            <>
-              <button
-                onClick={() => router.push("/notes")}
-                className="text-gray-600 hover:text-black"
-              >
-                Notes
-              </button>
-
-              <button
-                onClick={handleLogout}
-                className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition"
-              >
-                Logout
-              </button>
-            </>
-          ) : (
-            <>
-              <button
-                onClick={() => router.push("/login")}
-                className="text-gray-600 hover:text-black"
-              >
-                Login
-              </button>
-
-              <button
-                onClick={() => router.push("/register")}
-                className="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition"
-              >
-                Sign Up
-              </button>
-            </>
-          )}
-        </div>
-      </div>
-
+        <Navbar />
       {/* Hero Section */}
       <div className="flex flex-1 items-center justify-center px-6">
         <div className="max-w-3xl text-center">

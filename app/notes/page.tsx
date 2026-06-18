@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import Navbar from "../Navbar";
 
 type Note = {
   _id: string;
@@ -126,8 +127,9 @@ export default function NotesPage() {
   if (!session) return null;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center p-6">
-      <div className="w-full max-w-3xl">
+     <div className="min-h-screen bg-gradient-to-br from-gray-100 to-gray-200">
+        <Navbar />
+      <div className="max-w-3xl mx-auto px-6 py-8">
         {/* Header */}
         <div className="text-center mb-6">
           <h1 className="text-3xl font-semibold text-gray-800">📝 Notes</h1>

@@ -37,11 +37,16 @@ export const connectDB = async () => {
   try {
     cached.conn = await cached.promise;
     console.log("✅ MongoDB connected");
-  } catch (error) {
-    cached.promise = null;
-    console.error("❌ MongoDB connection error:", error);
-    throw error;
-  }
+  } catch (error: any) {
+  cached.promise = null;
+
+  console.error("Name:", error.name);
+  console.error("Message:", error.message);
+  console.error("Code:", error.code);
+  console.error("Stack:", error.stack);
+
+  throw error;
+}
 
   return cached.conn;
 };
