@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
-import OpenAI from "openai";
+import { GoogleGenAI } from "@google/genai";
 
-// 🔁 Toggle this
-const USE_REAL_AI = false;
+// 🔁 Toggle this to true to use Google's Free AI
+const USE_REAL_AI = true;
 
 export async function POST(req: Request) {
   try {
@@ -27,23 +27,17 @@ export async function POST(req: Request) {
       return NextResponse.json({ summary });
     }
 
-    // 🤖 REAL AI (OpenAI)
-    const openai = new OpenAI({
-      apiKey: process.env.OPENAI_API_KEY,
-    });
+    // (Google Gemini - Free Tier)
+    const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
-    const completion = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
-      messages: [
-        {
-          role: "user",
-          content: `Summarize this:\n${text}`,
-        },
-      ],
+    // gemini-2.5-flash is extremely fast and perfect for note summarization
+    const response = await ai.models.generateContent({
+      model: "gemini-2.5-flash",
+      contents: `Provide a clean, concise summary of the following notes:\n\n${text}`,
     });
 
     return NextResponse.json({
-      summary: completion.choices[0].message.content,
+      summary: response.text,
     });
 
   } catch (error) {
