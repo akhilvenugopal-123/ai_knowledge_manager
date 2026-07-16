@@ -20,9 +20,10 @@ export async function POST(req: Request) {
 
     await connectDB();
 
-    const { content, summary } = await req.json();
+    const { title,content, summary } = await req.json();
 
     const note = await Note.create({
+      title,
       content,
       summary,
       userId: session.user.id, // 🔥 link note to user
