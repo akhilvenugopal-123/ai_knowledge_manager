@@ -1,7 +1,13 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   images: {
-    domains: ["www.svgrepo.com"],
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'www.svgrepo.com',
+        pathname: '/**', // Allows all image paths from this domain
+      },
+    ],
   },
 };
 
