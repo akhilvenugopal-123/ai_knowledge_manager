@@ -95,7 +95,7 @@ export default function NotesPage() {
     try {
       setLoading(true);
 
-      const res = await fetch("/api/ai-summary", {
+      const res = await fetch("/api/ai-tools", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -148,7 +148,7 @@ export default function NotesPage() {
       // Convert image to Base64
       const base64 = await fileToBase64(file);
 
-      const res = await fetch("/api/ai-summary", {
+      const res = await fetch("/api/ai-tools", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -255,7 +255,7 @@ export default function NotesPage() {
 
       const base64Audio = await blobToBase64(audioBlob);
 
-      const res = await fetch("/api/ai-summary", {
+      const res = await fetch("/api/ai-tools", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
