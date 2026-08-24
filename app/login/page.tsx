@@ -38,7 +38,7 @@ export default function LoginPage() {
         return;
       }
 
-      router.push("/notes");
+      router.push("/ai-tools");
     } catch (err) {
       setError("Login failed");
     } finally {
@@ -49,7 +49,7 @@ export default function LoginPage() {
   // 🌐 Google Login
   const handleGoogleLogin = async () => {
     await signIn("google", {
-      callbackUrl: "/notes",
+      callbackUrl: "/ai-tools",
     });
   };
 

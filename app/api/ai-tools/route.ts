@@ -131,8 +131,7 @@ export async function POST(req: Request) {
 
     // --- CASE B: Voice / Audio Processing ---
     if (audio) {
-      const base64Audio = audio.replace(/^data:audio\/\w+;base64,/, "");
-
+      const base64Audio = audio.includes(",") ? audio.split(",").pop() : audio;
       let prompt = "";
       if (mode === "transcribe") {
         prompt = "Transcribe the audio speech accurately into text. Do not add commentary.";
