@@ -814,7 +814,8 @@ export default function NotesPage() {
 
               <div
                 key={note._id}
-                className="rounded-2xl overflow-hidden border border-[#1e1e30] bg-[#10101a] transition-all duration-300 hover:-translate-y-1 hover:border-violet-500/30 hover:bg-[#13131f] hover:shadow-[0_20px_60px_rgba(124,58,237,0.12)]"
+                onClick={() => router.push(`/note/${note._id}`)}
+                className="rounded-2xl overflow-hidden border border-[#1e1e30] bg-[#10101a] transition-all duration-300 hover:-translate-y-1 hover:border-violet-500/30 hover:bg-[#13131f] hover:shadow-[0_20px_60px_rgba(124,58,237,0.12)] cursor-pointer"
               >
 
                 {/* NOTE CONTENT */}
